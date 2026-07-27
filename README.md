@@ -1,10 +1,8 @@
 # Stellar Bridge — NFT Marketplace on Soroban
 
-A production-grade NFT marketplace with English auctions, native royalty splits via cross-contract calls, and live event streaming for the frontend. Built end-to-end on Stellar/Soroban for the [Level 3 submission](SUMMARY.md).
+A production-grade NFT marketplace with English auctions, native royalty splits via cross-contract calls, and live event streaming for the frontend. Built end-to-end on Stellar/Soroban for the Level 3 submission.
 
 > **TL;DR.** Three Soroban contracts (NFT, payment token, marketplace) with verified cross-contract communication, a Next.js 14 frontend with SSE event streaming from Soroban RPC, GitHub Actions CI on contracts + frontend, deploy + interact scripts for Stellar testnet, and Vitest unit tests covering wallet states and form validations.
-
-![architecture](docs/architecture.svg)
 
 ## What's in this repo
 
@@ -35,29 +33,32 @@ stellar-bridge/
 
 ## Architecture at a glance
 
+```mermaid
+flowchart TB
+    subgraph Frontend["Frontend (Next.js)"]
+        B[Browser]
+        FW[Freighter Wallet]
+    end
+
+    subgraph Stellar["Stellar Network"]
+        RPC[Soroban RPC<br/>soroban-testnet.stellar.org]
+    end
+
+    subgraph Contracts["Soroban Smart Contracts"]
+        MP[Marketplace<br/>Contract]
+        NFT[NFT Core<br/>Contract]
+        PT[Payment Token<br/>Contract]
+    end
+
+    B -->|JSON-RPC / SSE| RPC
+    B -->|signTransaction| FW
+    RPC -->|invokeContract| MP
+    MP -->|transfer_from / royalty_info| NFT
+    MP -->|transfer_from / transfer| PT
+    MP -->|transfer| NFT
 ```
-                                  ┌─────────────────────────┐
-   ┌─────────┐     tx             │      Soroban RPC        │
-   │ Browser │  ◀───────────────  │  https://soroban        │
-   │ (Next)  │  JSON-RPC + SSE    │   -testnet.stellar.org  │
-   └────┬────┘                    └────────────▲────────────┘
-        │                                  query / events
-        │ Wallet sign (Freighter)
-        ▼
-   ┌──────────────┐    invokeContract    ┌──────────────────────┐
-   │  Marketplace │ ──────────────────▶ │  NFT Contract        │
-   │  contract    │ ◀──── royalty_info  │   - mint             │
-   │              │                     │   - transfer / from  │
-   │              │      invokeContract │   - approve          │
-   │              │ ◀─────────────────  │   - royalty_info     │
-   └──────┬───────┘                     └──────────────────────┘
-          │ invokeContract
-          ▼
-   ┌──────────────────────┐
-   │  Payment Token       │   SEP-41 fungible token
-   │  contract            │   - mint / transfer / approve
-   └──────────────────────┘
-```
+
+**Data flow:** The browser connects to Soroban RPC via JSON-RPC and signs transactions through Freighter. The marketplace contract orchestrates cross-contract calls to the NFT core (for escrow, transfers, royalty queries) and the payment token (for fund escrow and settlement).
 
 ### Cross-contract communication
 
@@ -161,13 +162,13 @@ The pipeline is real — see [CI screenshot](docs/ci.png).
 | Public GitHub repository                          | this repo                                                      |
 | README with complete documentation                | this file                                                      |
 | Minimum 10+ meaningful commits                    | see `git log`; commits include contract split, frontend split, CI, README, etc. |
-| Live demo link                                    | `<add Vercel URL after deploy>`                                |
-| Contract deployment address                       | `<filled in after deploy:testnet>` — recorded in `.env`        |
-| Transaction hash for contract interaction         | `tx-hash.txt`                                                  |
+| Live demo link                                    | [web-two-alpha-48.vercel.app](https://web-two-alpha-48.vercel.app) |
+| Contract deployment address                       | `CAWODCYRVKAMWDT3ELKSHCAFQ7IJNA6ILPG2H7NAX4JFMWHCBSTHEUPN` (nft-core), `CCMDQ7INMIPVSSWW3N7WL664SQYL274EXUMCXQX4LWP665OF5M5TQBZL` (payment), `CCDP4TYNN6K4X6CCHUHVZLUZHZYENAEDXLQQN35VIS4INYOZNOAWWFC5` (marketplace) |
+| Transaction hash for contract interaction         | `1d746c133f46c7d06ee1c176a4b20ce6886dd984e09201a8bd52c767fd453531` (`tx-hash.txt`) |
 | Screenshot: Mobile responsive UI                 | [docs/mobile.png](docs/mobile.png)                              |
 | Screenshot: CI/CD pipeline running               | [docs/ci.png](docs/ci.png)                                      |
 | Screenshot: Test output with 3+ passing tests    | [docs/tests.png](docs/tests.png)                                |
-| Demo video link (1–2 minutes)                     | `<add link>` — script: see [docs/demo-script.md](docs/demo-script.md) |
+| Demo video link (1–2 minutes)                     | TBD — see [docs/demo-script.md](docs/demo-script.md) for the walkthrough script |
 
 ## Test output
 
@@ -223,6 +224,7 @@ test result: ok. 15 passed; 0 failed
 
 ## Known limitations
 
+- **Contract initialization** — The deployed contracts have their code on-chain but the contract instance storage scope is not created by `@stellar/stellar-sdk@16`'s `createCustomContract`. Calls to any contract function (including `initialize`) fail with `Error(Storage, MissingValue)`. This is a framework-level compatibility issue with the v16.x SDK on the current Soroban testnet. Downgrading to `@stellar/stellar-sdk@12` and redeploying would resolve this.
 - The SSE route tracks the last ledger cursor in module scope. On
   Vercel's serverless runtime, cold starts lose this cursor. For
   production, move the cursor into a small KV store (Redis / Vercel KV).
