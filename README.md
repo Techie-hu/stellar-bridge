@@ -53,9 +53,8 @@ flowchart TB
     B -->|JSON-RPC / SSE| RPC
     B -->|signTransaction| FW
     RPC -->|invokeContract| MP
-    MP -->|transfer_from / royalty_info| NFT
+    MP -->|transfer / transfer_from / royalty_info| NFT
     MP -->|transfer_from / transfer| PT
-    MP -->|transfer| NFT
 ```
 
 **Data flow:** The browser connects to Soroban RPC via JSON-RPC and signs transactions through Freighter. The marketplace contract orchestrates cross-contract calls to the NFT core (for escrow, transfers, royalty queries) and the payment token (for fund escrow and settlement).
