@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; }
+  .window { background: #161b22; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; max-width: 900px; margin: 0 auto; }
+  .titlebar { background: #21262d; padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #30363d; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .red { background: #ff5f56; }
+  .yellow { background: #ffbd2e; }
+  .green { background: #27c93f; }
+  .title { color: #8b949e; font-size: 13px; margin-left: 8px; }
+  .content { padding: 24px; font-family: 'Fira Code', 'Consolas', monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+  .section { margin-bottom: 24px; }
+  .section-title { color: #58a6ff; font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .pass { color: #3fb950; }
+  .warn { color: #d29922; }
+  .info { color: #8b949e; }
+  .cmd { color: #c9d1d9; }
+</style>
+</head>
+<body>
+  <div class="window">
+    <div class="titlebar">
+      <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+      <div class="title">pnpm test — stellar-bridge</div>
+    </div>
+    <div class="content">
+      <div class="section">
+        <div class="section-title"><span class="pass">✔</span> Frontend Tests (Vitest)</div>
+        <div class="cmd">
+&gt; @stellar-bridge/web@0.1.0 test /workspaces/stellar-bridge/apps/web
+&gt; vitest run
+
+
+ RUN  v2.1.9 /workspaces/stellar-bridge/apps/web
+
+ ✓ tests/WalletConnect.test.tsx (4 tests) 72ms
+ ✓ tests/NFTCard.test.tsx (3 tests) 51ms
+ ✓ tests/MintForm.test.tsx (3 tests) 79ms
+
+ Test Files  3 passed (3)
+      Tests  10 passed (10)
+   Start at  16:32:58
+   Duration  5.36s (transform 397ms, setup 1.27s, collect 1.30s, tests 203ms, environment 1.41s, prepare 404ms)
+
+</div>
+      </div>
+      <div class="section">
+        <div class="section-title"><span class="pass">✔</span> Contract Tests (Cargo)</div>
+        <div class="cmd">
+running 9 tests
+test test::auction_cancelled_by_seller_when_no_bids ... ok
+test test::auction_cannot_be_cancelled_after_bids ... ok
+test test::auction_full_lifecycle_with_refunds_and_royalty_split ... ok
+test test::bid_below_min_increment_is_rejected ... ok
+test test::cancel_listing_returns_nft_to_seller ... ok
+test test::fixed_price_listing_with_royalty_split ... ok
+test test::seller_cannot_bid_on_own_auction ... ok
+test test::subtract_bps_helper_without_overflow ... ok
+test test::settle_auction_with_no_bids_returns_nft_to_seller ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.68s
+
+
+running 11 tests
+test test::double_initialize_fails ... ok
+test test::initialize_sets_name_symbol_and_admin ... ok
+test test::mint_rejects_royalty_above_100_percent ... ok
+test test::mint_increments_supply_and_assigns_owner ... ok
+test test::non_owner_cannot_set_royalty ... ok
+test test::royalty_info_for_missing_token_fails ... ok
+test test::owner_can_update_token_uri_and_royalty ... ok
+test test::royalty_info_returns_set_values ... ok
+test test::transfer_from_without_approval_fails ... ok
+test test::transfer_moves_owner_and_clears_approval ... ok
+test test::transfer_from_works_via_approved_operator ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
+
+
+running 3 tests
+test test::mint_increments_balance_and_supply ... ok
+test test::approve_and_transfer_from_works ... ok
+test test::transfer_updates_balances_for_both_sides ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

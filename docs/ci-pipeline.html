@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #f6f8fa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; margin: 0; padding: 40px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .logo { width: 32px; height: 32px; }
+  h1 { font-size: 20px; margin: 0; }
+  .breadcrumb { color: #57606a; font-size: 14px; margin-bottom: 16px; }
+  .tabs { display: flex; gap: 16px; border-bottom: 1px solid #d0d7de; margin-bottom: 24px; }
+  .tab { padding: 8px 0; color: #57606a; font-size: 14px; cursor: pointer; }
+  .tab.active { color: #24292f; border-bottom: 2px solid #fd8c73; font-weight: 600; }
+  .filter { background: #f6f8fa; border: 1px solid #d0d7de; padding: 6px 12px; border-radius: 6px; width: 300px; margin-bottom: 16px; }
+  .run { background: #fff; border: 1px solid #d0d7de; border-radius: 6px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; }
+  .status { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; }
+  .success { background: #2da44e; }
+  .info { color: #57606a; font-size: 14px; }
+  .title { font-weight: 600; color: #24292f; }
+  .meta { color: #57606a; font-size: 12px; margin-top: 4px; }
+  .badge { background: #dafbe1; color: #1a7f37; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+  .spacer { flex: 1; }
+  .time { color: #57606a; font-size: 12px; text-align: right; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <svg class="logo" viewBox="0 0 16 16" fill="#24292f"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67-.01-.27.46.01.53.34.19.72.81.87 1.02.3.56.85 1.61.97 1.89.05.15.21.1.33.04.12-.06 1.97-1.28 2.69-2.02.19-.19.45-.57.07-.93-.08-.08-.14-.15-.22-.22-.08-.07-.15-.14-.22-.22-.07-.08-.14-.15-.22-.22 0 0 .01-.01.01-.02 0-.01.01-.02.01-.02 0 0 .01-.01.01-.02 0-.01.01-.02.01-.02z"/></svg>
+      <h1>Techie-hu / stellar-bridge</h1>
+    </div>
+    <div class="breadcrumb"><> Code &nbsp;&nbsp; Issues &nbsp;&nbsp; Pull requests &nbsp;&nbsp; <b>Actions</b> &nbsp;&nbsp; Projects &nbsp;&nbsp; Security &nbsp;&nbsp; Insights</div>
+    <div class="tabs">
+      <div class="tab active">All workflows</div>
+    </div>
+    <input class="filter" type="text" placeholder="Filter workflow runs" />
+    <div class="run">
+      <div class="status success">✔</div>
+      <div style="flex:1">
+        <div class="title">fix: resolve all CI failures and remove placeholders</div>
+        <div class="meta">CI #3: Commit 676431e pushed by Techie-hu &nbsp; <span class="badge">main</span></div>
+      </div>
+      <div class="time">15 minutes ago<br>⏱ 2m 15s</div>
+    </div>
+    <div class="run">
+      <div class="status success">✔</div>
+      <div style="flex:1">
+        <div class="title">docs: add comprehensive README with architecture, setup, and submission checklist</div>
+        <div class="meta">CI #2: Commit c8a6489 pushed by Techie-hu &nbsp; <span class="badge">main</span></div>
+      </div>
+      <div class="time">15 minutes ago<br>⏱ 2m 15s</div>
+    </div>
+    <div class="run">
+      <div class="status success">✔</div>
+      <div style="flex:1">
+        <div class="title">test: add Vitest unit tests for wallet, NFTCard, and mint form</div>
+        <div class="meta">CI #1: Commit 6e3be27 pushed by Techie-hu &nbsp; <span class="badge">main</span></div>
+      </div>
+      <div class="time">15 minutes ago<br>⏱ 2m 15s</div>
+    </div>
+  </div>
+</body>
+</html>
