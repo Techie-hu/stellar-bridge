@@ -1,0 +1,28 @@
+[package]
+name = "marketplace"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Stellar/Soroban marketplace with fixed-price listings and English auctions."
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+payment-token = { version = "0.1.0", path = "../payment-token" }
+
+[features]
+testutils = ["soroban-sdk/testutils"]
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = false
+strip = true
+lto = true
+codegen-units = 1
