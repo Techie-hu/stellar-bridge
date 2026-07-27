@@ -90,6 +90,12 @@ fn setup() -> (
 ) {
     let env = Env::default();
     env.mock_all_auths();
+    // Prevent contract instance / persistent entries from being archived when
+    // the test advances the ledger sequence to simulate long-running auctions.
+    env.ledger().with_mut(|li| {
+        li.min_persistent_entry_ttl = u32::MAX / 2;
+        li.max_entry_ttl = u32::MAX / 2;
+    });
 
     let admin = Address::generate(&env);
     let token_addr = register_token(&env, &admin);
@@ -116,11 +122,8 @@ fn setup() -> (
     (env, mp_client, admin, token_addr, alice, bob, carol, nft_id)
 }
 
-// FIXME: token::Client SEP-41 spec encoding incompatible with custom payment-token
-// contract in soroban-sdk 22.0.11 — marketplace's internal token::Client::transfer_from
-// fails. Un-ignore after upgrading to a version where custom contracts implement
-// the SEP-41 spec interface natively.
-#[ignore]
+// Verifies the full fixed-price buy path: payment token escrow, royalty split,
+// fee deduction, and NFT transfer to buyer.
 #[test]
 fn fixed_price_listing_with_royalty_split() {
     let (env, mp, admin, token_addr, alice, bob, _carol, nft) = setup();
@@ -173,9 +176,8 @@ fn cancel_listing_returns_nft_to_seller() {
     assert_eq!(nft_c.owner_of(&token_id), alice);
 }
 
-// FIXME: Same token::Client SEP-41 compatibility issue as fixed_price test.
-// Un-ignore after soroban-sdk upgrade resolves the encoding mismatch.
-#[ignore]
+// Verifies auction lifecycle: bidding, push-refunds, anti-snipe extension,
+// settlement with royalty + fee splits, and NFT transfer to winner.
 #[test]
 fn auction_full_lifecycle_with_refunds_and_royalty_split() {
     let (env, mp, admin, token_addr, alice, bob, carol, nft) = setup();
@@ -203,7 +205,7 @@ fn auction_full_lifecycle_with_refunds_and_royalty_split() {
     let bob_after = tk.balance(&bob);
     assert_eq!(bob_after - bob_before, 100_000);
 
-    env.ledger().set_sequence_number(5_300);
+    env.ledger().set_sequence_number(5_050); // within the last 100 ledgers (end = 5_100) → anti-snipe triggers
     let dan = Address::generate(&env);
     tk.mint(&dan, &10_000_000i128);
     tk.approve(&dan, &mp.address, &10_000_000i128, &u32::MAX);

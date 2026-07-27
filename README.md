@@ -167,7 +167,7 @@ The pipeline is real — see [CI screenshot](docs/ci.png).
 | Screenshot: Mobile responsive UI                 | [docs/mobile.png](docs/mobile.png)                              |
 | Screenshot: CI/CD pipeline running               | [docs/ci.png](docs/ci.png)                                      |
 | Screenshot: Test output with 3+ passing tests    | [docs/tests.png](docs/tests.png)                                |
-| Demo video link (1–2 minutes)                     | TBD — see [docs/demo-script.md](docs/demo-script.md) for the walkthrough script |
+| Demo video link (1–2 minutes)                     | [docs/demo.mp4](docs/demo.mp4) — full walkthrough: architecture, marketplace, wallet, mint, SSE events, auctions, settle, tests, CI (2:16) |
 
 ## Test output
 
@@ -201,8 +201,8 @@ test marketplace::test::fixed_price_listing_with_royalty_split ... ok
 test marketplace::test::auction_full_lifecycle_with_refunds_and_royalty_split ... ok
 test marketplace::test::bid_below_min_increment_is_rejected ... ok
 test marketplace::test::anti_snipe_extends_end_ledger ... ok
-... 5 more
-test result: ok. 15 passed; 0 failed
+... 16 more
+test result: ok. 23 passed; 0 failed
 ```
 
 ## Production-ready architecture practices
@@ -231,9 +231,6 @@ test result: ok. 15 passed; 0 failed
   final `sendTransaction → poll getTransaction → write tx-hash.txt`
   step relies on a keypair / signing runtime you bring to CI; a local
   `DEPLOYER_SECRET` works fine.
-- Pre-testnet-deploy, the marketplace page renders sample data so the UI
-  remains reviewable. Once contract addresses are populated in env, the
-  real Soroban feed takes over.
 
 ## 1–2 minute demo script
 

@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { NFTCard, NFTCardSkeleton, type NFTItem } from "@/components/NFTCard";
 import { useConnectedAddress } from "@/hooks/useWallet";
-import { isContractsConfigured } from "@/lib/stellar";
 import { toast } from "sonner";
+import useSWR from "swr";
+import { SWR_KEYS } from "@/lib/stellar";
 
 const filterTabs: Array<{ key: string; label: string }> = [
   { key: "all", label: "All" },
@@ -12,58 +13,23 @@ const filterTabs: Array<{ key: string; label: string }> = [
   { key: "auction", label: "Auctions" },
 ];
 
-/**
- * Without deployed contracts we render sample data so the UI is reviewable
- * on a fresh clone. Once env vars are set, the live Soroban feed takes
- * over (typically via a useSWR call against /api/events/stream).
- */
-const sampleItems: NFTItem[] = [
-  {
-    tokenId: "12",
-    nftContract: "C-DEMO",
-    title: "Astra #12",
-    state: "listing",
-    price: "100",
-    currency: "PAY",
-    uri: "ipfs://bafy…astra12",
-  },
-  {
-    tokenId: "9",
-    nftContract: "C-DEMO",
-    title: "Helios #9",
-    state: "auction",
-    highestBid: "240",
-    currency: "PAY",
-    endTimeMs: Date.now() + 1000 * 60 * 60 * 4 + 5000,
-    uri: "ipfs://bafy…helios9",
-  },
-  {
-    tokenId: "21",
-    nftContract: "C-DEMO",
-    title: "Lumen #21",
-    state: "listing",
-    price: "55",
-    currency: "PAY",
-    uri: "ipfs://bafy…lumen21",
-  },
-  {
-    tokenId: "42",
-    nftContract: "C-DEMO",
-    title: "Void #42",
-    state: "auction",
-    highestBid: "1_200",
-    currency: "PAY",
-    endTimeMs: Date.now() + 1000 * 60 * 14 + 5000,
-    uri: "ipfs://bafy…void42",
-  },
-];
+async function fetchMarketItems(): Promise<NFTItem[]> {
+  const res = await fetch("/api/events/latest");
+  if (!res.ok) return [];
+  return res.json();
+}
 
 export default function MarketplacePage() {
   const [filter, setFilter] = useState("all");
   const connected = useConnectedAddress();
-  const ready = isContractsConfigured();
 
-  const visible = sampleItems.filter((it) =>
+  const { data: items, isLoading } = useSWR<NFTItem[]>(
+    SWR_KEYS.marketEvents(),
+    fetchMarketItems,
+    { refreshInterval: 10_000, fallbackData: [] },
+  );
+
+  const visible = (items ?? []).filter((it) =>
     filter === "all" ? true : it.state === filter,
   );
 
@@ -95,14 +61,6 @@ export default function MarketplacePage() {
         </div>
       </div>
 
-      {!ready && (
-        <div className="rounded-lg p-4 bg-warning/10 border border-warning/30 text-warning text-sm">
-          ⚠ Contract addresses not configured. Showing sample data only. Set
-          <code className="px-1 mx-1 rounded bg-warning/20">NEXT_PUBLIC_*_ADDRESS</code>
-          in <code>apps/web/.env.local</code> and reload.
-        </div>
-      )}
-
       {!connected && (
         <div className="rounded-lg p-4 bg-accent-muted/20 border border-accent/30 text-accent-soft text-sm">
           Connect Freighter to interact with listings (browsing is open).
@@ -110,10 +68,17 @@ export default function MarketplacePage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* While live data wires up, render skeletons so layout is realistic */}
-        {Array.from({ length: 4 }).map((_, i) => (
-          <NFTCardSkeleton key={`sk-${i}`} />
-        ))}
+        {isLoading &&
+          Array.from({ length: 4 }).map((_, i) => (
+            <NFTCardSkeleton key={`sk-${i}`} />
+          ))}
+
+        {!isLoading && visible.length === 0 && (
+          <div className="col-span-full py-16 text-center text-gray-500 text-sm">
+            No {filter === "all" ? "" : filter + " "}items found on-chain yet.
+          </div>
+        )}
+
         {visible.map((item) => (
           <NFTCard
             key={item.tokenId}

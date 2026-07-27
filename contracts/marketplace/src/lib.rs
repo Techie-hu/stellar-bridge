@@ -251,9 +251,9 @@ impl Marketplace {
         // Update NFT state: marketplace is currently the owner, push to buyer.
         Self::transfer_nft_from_escrow(&env, &nft, token_id, &buyer)?;
 
-        // Clear listing.
+        // Clear listing. Do NOT bump TTL on a removed key — extend_ttl
+        // on a deleted entry panics in soroban-env-host 22.x.
         env.storage().persistent().remove(&DataKey::Listing(nft.clone(), token_id));
-        bump_persistent_l(&env, &nft, token_id);
         publish_listing_bought(&env, &buyer, &listing.seller, &nft, token_id, listing.price);
         Ok(())
     }

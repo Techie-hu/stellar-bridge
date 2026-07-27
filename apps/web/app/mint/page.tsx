@@ -15,7 +15,7 @@ type FormState = {
 
 function defaultState(addr: string | null): FormState {
   return {
-    uri: "ipfs://bafy…your-metadata-uri",
+    uri: "",
     royaltyBps: "500", // 5%
     royaltyRecipient: addr ?? "",
   };
@@ -48,15 +48,21 @@ export default function MintPage() {
 
     setSubmitting(true);
     try {
-      // In production: simulateAndSend against NFT_CORE_ADDRESS mint().
-      // For now we simulate a successful transaction so the UX is reviewable.
-      await new Promise((r) => setTimeout(r, 600));
-      toast.success(
-        `Mock-mint queued for royalty recipient ${form.royaltyRecipient.slice(
-          0,
-          6,
-        )}… at ${form.royaltyBps} bps`,
-      );
+      const result = await simulateAndSend({
+        contractAddress: contractIds.nftCore,
+        method: "mint",
+        args: [address, form.uri, form.royaltyRecipient, Number(form.royaltyBps)],
+        sourcePublicKey: address!,
+      });
+
+      if (result.status === "SUCCESS") {
+        toast.success(
+          `Minted! Token ID: ${result.result ?? "—"}  ·  tx: ${result.hash.slice(0, 12)}…`,
+        );
+        setForm(defaultState(address));
+      } else {
+        toast.error(`Transaction ${result.status.toLowerCase()}. Hash: ${result.hash.slice(0, 12)}…`);
+      }
     } catch (e) {
       const err = normalizeError(e);
       toast.error(stellarErrorMessage(err).slice(0, 160));
@@ -71,14 +77,14 @@ export default function MintPage() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Mint NFT</h1>
         <p className="text-gray-400 text-sm mt-1">
           Mint a new NFT on the Stellar Bridge collection. Set your royalty
-          split; you'll receive proceeds in your wallet after each sale.
+          split; you&apos;ll receive proceeds in your wallet after each sale.
         </p>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-5 bg-bg-surface rounded-xl border border-white/5 p-5 sm:p-6">
         <Field label="Metadata URI" hint="IPFS CID or HTTPS URL pointing to JSON metadata">
           <input
-            className="input"
+            className="w-full bg-bg-elevated border border-white/[0.06] rounded-lg px-3 py-2.5 text-gray-100 focus:outline-2 focus:outline-accent-soft focus:outline-offset-0"
             value={form.uri}
             onChange={(e) => setForm({ ...form, uri: e.target.value })}
             placeholder="ipfs://bafy…"
@@ -91,7 +97,7 @@ export default function MintPage() {
           hint="0–10000 (10000 = 100%). Sellers receive (price – royalty – fee)."
         >
           <input
-            className="input"
+            className="w-full bg-bg-elevated border border-white/[0.06] rounded-lg px-3 py-2.5 text-gray-100 focus:outline-2 focus:outline-accent-soft focus:outline-offset-0"
             type="number"
             min={0}
             max={10000}
@@ -102,7 +108,7 @@ export default function MintPage() {
 
         <Field label="Royalty recipient" hint="Stellar address (G… or C…)">
           <input
-            className="input font-mono"
+            className="w-full font-mono bg-bg-elevated border border-white/[0.06] rounded-lg px-3 py-2.5 text-gray-100 focus:outline-2 focus:outline-accent-soft focus:outline-offset-0"
             value={form.royaltyRecipient}
             onChange={(e) =>
               setForm({ ...form, royaltyRecipient: e.target.value })
@@ -125,21 +131,6 @@ export default function MintPage() {
           Tip: connect Freighter to populate the recipient with your own address.
         </p>
       )}
-
-      <style jsx>{`
-        .input {
-          width: 100%;
-          background: theme("colors.bg.elevated");
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          border-radius: 0.5rem;
-          padding: 0.625rem 0.75rem;
-          color: theme("colors.gray.100");
-        }
-        .input:focus {
-          outline: 2px solid theme("colors.accent.soft");
-          outline-offset: 0;
-        }
-      `}</style>
     </div>
   );
 }

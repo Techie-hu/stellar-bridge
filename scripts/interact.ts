@@ -1,12 +1,13 @@
 /**
  * Post-deploy interaction script.
  *
- * Drives a complete marketplace listing + simulated buy using the deployed
- * contract addresses. Writes the resulting transaction hash to
- * `tx-hash.txt` so it can be linked from the README & demo video.
+ * Drives a complete marketplace mint using the deployed contract addresses.
+ * Simulates and sends the transaction, then prints the resulting hash.
+ * The hash is written to `tx-hash.txt` only when a real hash is returned
+ * by the Soroban RPC (requires DEPLOYER_SECRET to be set).
  *
  * Usage:
- *   pnpm tsx scripts/interact.ts
+ *   DEPLOYER_SECRET=S… pnpm tsx scripts/interact.ts
  *
  * Requires apps/web/.env.local populated with the three contract addresses
  * from a previous successful `pnpm deploy:testnet`.
@@ -26,15 +27,22 @@ async function rpc(method: string, params: unknown): Promise<unknown> {
   return res.json();
 }
 
-async function signAndSend(signer: Keypair, txXdr: string, _network: string) {
+async function signAndSend(signer: Keypair, txXdr: string, _network: string): Promise<string | null> {
   const sim = await rpc("simulateTransaction", { transaction: txXdr });
   if (sim.error) throw new Error(`simulate: ${sim.error}`);
 
-  // signer would re-sign with the prepared TX before sendTransaction.
-  // For this script we just print simulation output so the README
-  // can show evidence of cross-contract intent.
   console.log("simulate OK", JSON.stringify(sim, null, 2));
-  return null;
+
+  // Send the transaction and return its hash for recording.
+  const sent = (await rpc("sendTransaction", { transaction: txXdr })) as {
+    hash?: string;
+    status?: string;
+    errorResultXdr?: string;
+  };
+  if (sent.errorResultXdr) {
+    throw new Error(`sendTransaction error: ${sent.errorResultXdr}`);
+  }
+  return sent.hash ?? null;
 }
 
 async function main() {
@@ -78,13 +86,15 @@ async function main() {
     .setTimeout(30)
     .build();
 
-  await signAndSend(signerKp, mintTx.toXDR(), network);
+  const hash = await signAndSend(signerKp, mintTx.toXDR(), network);
 
-  // Output a placeholder tx hash. The real one is produced by sendTransaction
-  // above once the signer is hooked up; we capture it for the README.
-  const txHashPlaceholder = "<pending>";
-  fs.writeFileSync(path.resolve(process.cwd(), "tx-hash.txt"), txHashPlaceholder);
-  console.log(`Wrote demo tx hash placeholder to tx-hash.txt`);
+  if (hash) {
+    fs.writeFileSync(path.resolve(process.cwd(), "tx-hash.txt"), hash);
+    console.log(`Wrote tx hash to tx-hash.txt: ${hash}`);
+  } else {
+    console.log("interact.ts completed — no hash returned (simulation-only run).");
+    console.log("Set DEPLOYER_SECRET to a funded testnet keypair to submit a real transaction.");
+  }
 }
 
 main().catch((e) => {
