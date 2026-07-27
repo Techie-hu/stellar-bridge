@@ -10,14 +10,5 @@ const nextConfig = {
       { protocol: "https", hostname: "**" },
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/marketplace",
-        permanent: false,
-      },
-    ];
-  },
 };
 export default nextConfig;
