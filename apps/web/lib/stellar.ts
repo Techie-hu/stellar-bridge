@@ -36,10 +36,12 @@ const DEPLOYED_NFT_CORE    = "CAWODCYRVKAMWDT3ELKSHCAFQ7IJNA6ILPG2H7NAX4JFMWHCBS
 const DEPLOYED_PAYMENT     = "CCMDQ7INMIPVSSWW3N7WL664SQYL274EXUMCXQX4LWP665OF5M5TQBZL";
 const DEPLOYED_MARKETPLACE = "CCDP4TYNN6K4X6CCHUHVZLUZHZYENAEDXLQQN35VIS4INYOZNOAWWFC5";
 
+// Use || instead of ?? here: on Vercel, unset NEXT_PUBLIC_* env vars are
+// inlined as empty strings "" at build time, which ?? does not catch.
 export const contractIds: ContractIds = {
-  nftCore:      process.env.NEXT_PUBLIC_NFT_CORE_ADDRESS      ?? DEPLOYED_NFT_CORE,
-  paymentToken: process.env.NEXT_PUBLIC_PAYMENT_TOKEN_ADDRESS ?? DEPLOYED_PAYMENT,
-  marketplace:  process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS   ?? DEPLOYED_MARKETPLACE,
+  nftCore:      process.env.NEXT_PUBLIC_NFT_CORE_ADDRESS      || DEPLOYED_NFT_CORE,
+  paymentToken: process.env.NEXT_PUBLIC_PAYMENT_TOKEN_ADDRESS || DEPLOYED_PAYMENT,
+  marketplace:  process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS   || DEPLOYED_MARKETPLACE,
 };
 
 export function isContractsConfigured(): boolean {
