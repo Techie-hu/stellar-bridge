@@ -55,7 +55,6 @@ impl NftCore {
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::Name, &name);
         env.storage().instance().set(&DataKey::Symbol, &symbol);
-        env.storage().instance().set(&DataKey::NextTokenId, &0u32);
         bump_instance(&env);
         Ok(())
     }
