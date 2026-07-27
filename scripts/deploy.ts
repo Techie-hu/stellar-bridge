@@ -82,8 +82,8 @@ async function waitForTxSuccess(hash: string, label: string): Promise<void> {
 }
 
 /** Simulate, sign, send, and wait for confirmation. Returns the sim result (for returnValue). */
-async function simSignSend(
-  server: SorobanRpc.Server,
+async function  simSignSend(
+  server: rpc.Server,
   keypair: Keypair,
   op: xdr.Operation,
   label: string,
@@ -153,7 +153,7 @@ async function deployContract(
   const deployerAddr = new Address(keypair.publicKey());
 
   // Deterministic salt ensures consistent contract address
-  const saltInput = `${label}:${keypair.publicKey()}:3`;
+  const saltInput = `${label}:${keypair.publicKey()}:5`;
   const salt = crypto.createHash("sha256").update(saltInput).digest();
   const expectedAddr = computeContractAddress(keypair.publicKey(), salt);
   console.log(`  Expected address: ${expectedAddr.slice(0, 16)}…`);
@@ -198,41 +198,61 @@ async function deployContract(
 }
 
 async function initContract(
-  server: SorobanRpc.Server,
+  server: rpc.Server,
   contractAddr: string,
   funcName: string,
   args: xdr.ScVal[],
   label: string,
   keypair: Keypair,
+  maxRetries = 5,
 ): Promise<string> {
   console.log(`  Init ${contractAddr.slice(0, 12)}… (${funcName})`);
-  const account = await server.getAccount(keypair.publicKey());
-  const source = new Account(keypair.publicKey(), account.sequenceNumber());
-  const op = Operation.invokeHostFunction({
-    func: xdr.HostFunction.hostFunctionTypeInvokeContract(
-      new xdr.InvokeContractArgs({
-        contractAddress: new Address(contractAddr).toScAddress(),
-        functionName: funcName,
-        args,
-      }),
-    ),
-    auth: [],
-  });
 
-  const tx = new TransactionBuilder(source, { fee: BASE_FEE, networkPassphrase: NETWORK_PASSPHRASE })
-    .addOperation(op).setTimeout(30).build();
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    if (attempt > 0) {
+      const wait = 2 ** attempt * 2; // 4s, 8s, 16s, 32s
+      console.log(`  Retry ${attempt + 1}/${maxRetries} after ${wait}s...`);
+      await new Promise(r => setTimeout(r, wait * 1000));
+    }
 
-  const sim = await server.simulateTransaction(tx);
-  if (sim.error) throw new Error(`Init sim error ${label}: ${JSON.stringify(sim.error)}`);
+    try {
+      const account = await server.getAccount(keypair.publicKey());
+      const source = new Account(keypair.publicKey(), account.sequenceNumber());
+      const op = Operation.invokeHostFunction({
+        func: xdr.HostFunction.hostFunctionTypeInvokeContract(
+          new xdr.InvokeContractArgs({
+            contractAddress: new Address(contractAddr).toScAddress(),
+            functionName: funcName,
+            args,
+          }),
+        ),
+        auth: [],
+      });
 
-  const prep = await server.prepareTransaction(tx);
-  prep.sign(keypair);
-  const sent = await server.sendTransaction(prep);
-  if (sent.status === "ERROR") throw new Error(`Init send error ${label}`);
+      const tx = new TransactionBuilder(source, { fee: BASE_FEE, networkPassphrase: NETWORK_PASSPHRASE })
+        .addOperation(op).setTimeout(30).build();
 
-  await waitForTxSuccess(sent.hash, label);
-  console.log(`  ✓ ${funcName} complete`);
-  return sent.hash;
+      const sim = await server.simulateTransaction(tx);
+      if (sim.error) {
+        const errStr = JSON.stringify(sim.error);
+        if (errStr.includes("MissingValue") && attempt < maxRetries - 1) continue;
+        throw new Error(`Init sim error ${label}: ${errStr}`);
+      }
+
+      const prep = await server.prepareTransaction(tx);
+      prep.sign(keypair);
+      const sent = await server.sendTransaction(prep);
+      if (sent.status === "ERROR") throw new Error(`Init send error ${label}`);
+
+      await waitForTxSuccess(sent.hash, label);
+      console.log(`  ✓ ${funcName} complete`);
+      return sent.hash;
+    } catch (e: any) {
+      if (e.message?.includes("MissingValue") && attempt < maxRetries - 1) continue;
+      throw e;
+    }
+  }
+  throw new Error(`Failed to init ${label} after ${maxRetries} retries`);
 }
 
 async function main() {

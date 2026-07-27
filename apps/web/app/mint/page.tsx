@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useConnectedAddress } from "@/hooks/useWallet";
 import { toast } from "sonner";
 import { simulateAndSend, normalizeError } from "@/lib/simulateAndSend";
+import { stellarErrorMessage } from "@/lib/stellarSdk";
 import { contractIds } from "@/lib/stellar";
 
 type FormState = {
@@ -58,15 +59,7 @@ export default function MintPage() {
       );
     } catch (e) {
       const err = normalizeError(e);
-      toast.error(
-        err.kind === "contract_error"
-          ? `Contract error: ${err.message.slice(0, 120)}`
-          : err.kind === "wallet_rejected"
-          ? "Wallet rejected the transaction"
-          : err.kind === "rpc_unreachable"
-          ? "Soroban RPC unreachable"
-          : err.message ?? "Unexpected error",
-      );
+      toast.error(stellarErrorMessage(err).slice(0, 160));
     } finally {
       setSubmitting(false);
     }

@@ -39,6 +39,26 @@ export type StellarError =
   | { kind: "contract_error"; code: number; message: string }
   | { kind: "unknown"; message: string };
 
+/** Convert a StellarError to a human-readable message string. */
+export function stellarErrorMessage(err: StellarError): string {
+  switch (err.kind) {
+    case "wallet_not_installed":
+      return "Freighter wallet not installed. Install the Freighter browser extension.";
+    case "wallet_locked":
+      return "Freighter wallet is locked. Unlock it and try again.";
+    case "wallet_rejected":
+      return "Transaction was rejected in Freighter.";
+    case "network_mismatch":
+      return `Network mismatch: expected ${err.expected}, got ${err.got}`;
+    case "rpc_unreachable":
+      return `RPC unreachable: ${err.message}`;
+    case "contract_error":
+      return err.message;
+    case "unknown":
+      return err.message;
+  }
+}
+
 export function classifyError(e: unknown): StellarError {
   const msg = (e instanceof Error ? e.message : String(e)).slice(0, 320);
   if (/Freighter|extension|window\.freighter/i.test(msg))

@@ -19,7 +19,8 @@ import {
   Address,
   Contract,
   nativeToScVal,
-  scvalToNative,
+  scValToNative,
+  Account,
 } from "@stellar/stellar-sdk";
 
 import {
@@ -54,11 +55,17 @@ export async function buildContractCall({
 
 export async function simulateAndSend(args: SendArgs): Promise<SendResult> {
   const rpc = getRpc();
-  const sourceAddr = new Address(args.sourcePublicKey);
+
+  // Fetch the source account from the network to get the current sequence number.
+  const sourceAccount = await rpc.getAccount(args.sourcePublicKey);
+  const source = new Account(
+    args.sourcePublicKey,
+    sourceAccount.sequenceNumber(),
+  );
 
   const op = await buildContractCall(args);
 
-  const tx = new TransactionBuilder(sourceAddr, {
+  const tx = new TransactionBuilder(source, {
     fee: "100",
     networkPassphrase,
   })
@@ -74,15 +81,11 @@ export async function simulateAndSend(args: SendArgs): Promise<SendResult> {
   const prepared = await rpc.prepareTransaction(tx);
   const xdr = prepared.toXDR();
 
-  let signedXdr: string;
-  try {
-    signedXdr = await signTransaction(xdr, { networkPassphrase });
-  } catch (e) {
-    throw e;
-  }
+  const signedResult = await signTransaction(xdr, { networkPassphrase });
+  const signedTxXdr = typeof signedResult === "string" ? signedResult : signedResult.signedTxXdr;
 
   const signedTx = TransactionBuilder.fromXDR(
-    signedXdr,
+    signedTxXdr,
     networkPassphrase,
   );
   const sent = await rpc.sendTransaction(signedTx);
@@ -99,7 +102,7 @@ export async function simulateAndSend(args: SendArgs): Promise<SendResult> {
         status: "SUCCESS",
         hash,
         result: polled.returnValue
-          ? scvalToNative(polled.returnValue)
+          ? scValToNative(polled.returnValue)
           : undefined,
       };
     }

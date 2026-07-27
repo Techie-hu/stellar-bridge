@@ -43,8 +43,11 @@ impl NftCore {
     /// * `name`  — collection name (e.g. `"Stellar Bridge Genesis"`)
     /// * `symbol` — ticker (e.g. `"SBG"`)
     pub fn initialize(env: Env, admin: Address, name: String, symbol: String) -> Result<(), ContractError> {
-        // Bump instance TTL FIRST before any instance reads (new contracts may have 0 TTL)
-        bump_instance(&env);
+        // Write NextTokenId FIRST to create the instance storage scope.
+        // Freshly created contracts may not have an instance scope yet;
+        // has() and extend_ttl() fail on non-existent scopes, but set() creates it.
+        env.storage().instance().set(&DataKey::NextTokenId, &0u32);
+
         if env.storage().instance().has(&DataKey::Admin) {
             return Err(ContractError::AlreadyInitialized);
         }

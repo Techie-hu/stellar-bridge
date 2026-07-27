@@ -18,8 +18,8 @@ import {
   ReactNode,
 } from "react";
 import {
+  getAddress,
   getNetworkDetails,
-  getPublicKey,
   isAllowed,
   isConnected,
   setAllowed,
@@ -57,7 +57,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setState({ kind: "error", error: { kind: "wallet_rejected" } });
         return;
       }
-      const address = await getPublicKey();
+      const { address } = await getAddress();
       const details = await getNetworkDetails();
       if (details.networkPassphrase !== networkPassphrase) {
         setState({

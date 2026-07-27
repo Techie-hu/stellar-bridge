@@ -13,12 +13,14 @@ vi.mock("@stellar/freighter-api", () => ({
   isConnected: vi.fn(async () => true),
   isAllowed: vi.fn(async () => true),
   setAllowed: vi.fn(async () => true),
-  getPublicKey: vi.fn(async () => "GBSAMPLEWALLETADDRESSXXXXXXXXXXXXXXXXXXXXXXXXX"),
+  getAddress: vi.fn(async () => ({
+    address: "GBSAMPLEWALLETADDRESSXXXXXXXXXXXXXXXXXXXXXXXXX",
+  })),
   getNetworkDetails: vi.fn(async () => ({
     network: "TESTNET",
     networkPassphrase: "Test SDF Network ; September 2015",
   })),
-  signTransaction: vi.fn(async (xdr: string) => `signed_${xdr}`),
+  signTransaction: vi.fn(async (xdr: string) => ({ signedTxXdr: `signed_${xdr}`, signerAddress: "G…" })),
 }));
 
 vi.mock("@stellar/stellar-sdk", async (importOriginal) => {
