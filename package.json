@@ -1,0 +1,29 @@
+{
+  "name": "stellar-bridge",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Production-ready NFT marketplace with auctions on Stellar/Soroban — inter-contract calls, event streaming, CI/CD, tests.",
+  "scripts": {
+    "contracts:build": "cargo build --workspace --target wasm32-unknown-unknown --release",
+    "contracts:test": "cargo test --workspace",
+    "contracts:check": "cargo check --workspace --target wasm32-unknown-unknown",
+    "contracts:fmt": "cargo fmt --all -- --check",
+    "web:dev": "pnpm --dir apps/web dev",
+    "web:build": "pnpm --dir apps/web build",
+    "web:lint": "pnpm --dir apps/web lint",
+    "web:test": "pnpm --dir apps/web test",
+    "lint": "npm run contracts:fmt && npm run web:lint",
+    "test": "npm run contracts:test && npm run web:test",
+    "build": "npm run contracts:build && npm run web:build",
+    "deploy:testnet": "tsx scripts/deploy.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "dependencies": {
+    "@stellar/stellar-sdk": "^16.1.0"
+  }
+}

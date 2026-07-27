@@ -1,0 +1,39 @@
+[workspace]
+members = [
+    "contracts/nft-core",
+    "contracts/payment-token",
+    "contracts/marketplace",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+authors = ["Stellar Bridge Team"]
+license = "MIT"
+rust-version = "1.80"
+
+[workspace.dependencies]
+soroban-sdk = "22.0.0"
+soroban-token-sdk = "22.0.0"
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = false
+strip = true
+lto = true
+codegen-units = 1
+
+[profile.test]
+opt-level = 0
+debug = true
+
+# Force-downgrade the transitive `ed25519-dalek` to v2.2.0 from the v3.0.0
+# line that soroban-env-host 22.1.x currently requests. v3.0.0 ships a new
+# `CryptoRng`/`TryRng` surface in `rand_core` that the host crate's
+# testutils RNG shim does not yet satisfy, breaking `cargo test`.
+# The original ed25519-dalek repo was archived; the v2.2.0 tag was moved to
+# dalek-cryptography/curve25519-dalek under the tag `ed25519-2.2.0`.
+[patch.crates-io]
+ed25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", tag = "ed25519-2.2.0", features = ["std"] }
