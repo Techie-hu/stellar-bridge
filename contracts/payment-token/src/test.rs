@@ -6,7 +6,7 @@ use soroban_sdk::{testutils::Address as _, Address, Env, Symbol};
 fn setup() -> (Env, PaymentTokenClient<'static>, Address) {
     let env = Env::default();
     env.mock_all_auths();
-    let id = env.register_contract(None, PaymentToken);
+    let id = env.register(PaymentToken, ());
     let client = PaymentTokenClient::new(&env, &id);
     let admin = Address::generate(&env);
     let name = Symbol::new(&env, "PayToken");

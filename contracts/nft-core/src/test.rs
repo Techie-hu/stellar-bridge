@@ -12,7 +12,7 @@ use soroban_sdk::{testutils::Address as _, Address, Env, String};
 fn setup() -> (Env, NftCoreClient<'static>, Address) {
     let env = Env::default();
     env.mock_all_auths();
-    let contract_id = env.register_contract(None, NftCore);
+    let contract_id = env.register(NftCore, ());
     let client = NftCoreClient::new(&env, &contract_id);
     let admin = Address::generate(&env);
     let name = String::from_str(&env, "Stellar Bridge Genesis");

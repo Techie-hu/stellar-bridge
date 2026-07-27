@@ -9,7 +9,7 @@
 use super::*;
 use soroban_sdk::{
     testutils::{Address as _, Ledger},
-    Address, Env, String, Symbol, Vec,
+    Address, Env, String, Symbol,
 };
 
 // ─── Minimal inline NFT contract (used by marketplace tests) ───
@@ -71,7 +71,7 @@ mod nft_minimal {
 }
 
 fn register_token(env: &Env, admin: &Address) -> Address {
-    let id = env.register_contract(None, payment_token::PaymentToken);
+    let id = env.register(payment_token::PaymentToken, ());
     let c = payment_token::PaymentTokenClient::new(env, &id);
     let name = Symbol::new(env, "PayToken");
     c.initialize(admin, &name, &7u32);
@@ -100,11 +100,11 @@ fn setup() -> (
     let admin = Address::generate(&env);
     let token_addr = register_token(&env, &admin);
 
-    let mp_id = env.register_contract(None, Marketplace);
+    let mp_id = env.register(Marketplace, ());
     let mp_client = MarketplaceClient::new(&env, &mp_id);
     mp_client.initialize(&admin, &token_addr, &250u32); // 2.5% fee
 
-    let nft_id = env.register_contract(None, nft_minimal::NftMinimal);
+    let nft_id = env.register(nft_minimal::NftMinimal, ());
     let nft_c = nft_minimal::NftMinimalClient::new(&env, &nft_id);
     nft_c.init(&admin);
 
