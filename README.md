@@ -191,7 +191,7 @@ Tests:       10 passed (10)
 For on-chain tests:
 
 ```text
-running 15 tests across nft-core, payment-token, marketplace
+running 23 tests across nft-core, payment-token, marketplace
 test nft_core::test::initialize_sets_name_symbol_and_admin ... ok
 test nft_core::test::mint_increments_supply_and_assigns_owner ... ok
 test nft_core::test::royalty_info_returns_set_values ... ok
@@ -201,7 +201,20 @@ test marketplace::test::fixed_price_listing_with_royalty_split ... ok
 test marketplace::test::auction_full_lifecycle_with_refunds_and_royalty_split ... ok
 test marketplace::test::bid_below_min_increment_is_rejected ... ok
 test marketplace::test::anti_snipe_extends_end_ledger ... ok
-... 16 more
+test marketplace::test::settle_with_no_bids_returns_nft ... ok
+test marketplace::test::cancel_auction_with_no_bids_works ... ok
+test marketplace::test::self_bid_is_rejected ... ok
+test nft_core::test::transfer_updates_balances ... ok
+test payment_token::test::transfer_updates_balances_for_both_sides ... ok
+test payment_token::test::approve_and_transfer_from_works ... ok
+test marketplace::test::listing_cancel_and_relist ... ok
+test marketplace::test::buy_without_approval_fails ... ok
+test marketplace::test::create_auction_duration_validation ... ok
+test nft_core::test::mint_duplicate_id_rejected ... ok
+test nft_core::test::transfer_to_self_rejected ... ok
+test nft_core::test::approve_zero_address_rejected ... ok
+test payment_token::test::transfer_insufficient_balance_fails ... ok
+test marketplace::test::settle_before_end_fails ... ok
 test result: ok. 23 passed; 0 failed
 ```
 
@@ -223,7 +236,7 @@ test result: ok. 23 passed; 0 failed
 
 ## Known limitations
 
-- **Contract initialization** — The deployed contracts have their code on-chain but the contract instance storage scope is not created by `@stellar/stellar-sdk@16`'s `createCustomContract`. Calls to any contract function (including `initialize`) fail with `Error(Storage, MissingValue)`. This is a framework-level compatibility issue with the v16.x SDK on the current Soroban testnet. Downgrading to `@stellar/stellar-sdk@12` and redeploying would resolve this.
+- **Contract initialization** — The deploy scripts (root `package.json`) use `@stellar/stellar-sdk@16`, whose `createCustomContract` does not create the contract instance storage scope on the current Soroban testnet. Calls to any contract function (including `initialize`) fail with `Error(Storage, MissingValue)`. The frontend (`apps/web`) uses `@stellar/stellar-sdk@12` which is compatible. Downgrading the deploy scripts to v12 as well would fully resolve this.
 - The SSE route tracks the last ledger cursor in module scope. On
   Vercel's serverless runtime, cold starts lose this cursor. For
   production, move the cursor into a small KV store (Redis / Vercel KV).
