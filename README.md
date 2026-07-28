@@ -167,7 +167,7 @@ The pipeline is real — see [CI screenshot](docs/ci.png).
 | Screenshot: Mobile responsive UI                 | [docs/mobile.png](docs/mobile.png)                              |
 | Screenshot: CI/CD pipeline running               | [docs/ci.png](docs/ci.png)                                      |
 | Screenshot: Test output with 3+ passing tests    | [docs/tests.png](docs/tests.png)                                |
-| Demo video link (1–2 minutes)                     | [github.com/…/releases/download/v1.0.0/demo.mp4](https://github.com/Techie-hu/stellar-bridge/releases/download/v1.0.0/demo.mp4) — full walkthrough: architecture, contracts, marketplace, wallet, tests, CI, mobile responsive (0:54) |
+| Demo video link (1–2 minutes)                     | [docs/demo.mp4](https://github.com/Techie-hu/stellar-bridge/raw/main/docs/demo.mp4) — full walkthrough: architecture, contracts, marketplace, wallet, tests, CI, mobile responsive (0:54) |
 
 ## Test output
 
